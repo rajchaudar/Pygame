@@ -15,6 +15,14 @@ GRID_SIZE = 20
 GRID_WIDTH = WIDTH // GRID_SIZE
 GRID_HEIGHT = HEIGHT // GRID_SIZE
 
+# Fullscreen variables
+is_fullscreen = False
+original_width, original_height = WIDTH, HEIGHT
+
+# Fullscreen variables
+is_fullscreen = False
+original_width, original_height = WIDTH, HEIGHT
+
 # Game speeds for different difficulty levels
 EASY_FPS = 8
 MEDIUM_FPS = 12
