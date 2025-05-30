@@ -19,10 +19,6 @@ GRID_HEIGHT = HEIGHT // GRID_SIZE
 is_fullscreen = False
 original_width, original_height = WIDTH, HEIGHT
 
-# Fullscreen variables
-is_fullscreen = False
-original_width, original_height = WIDTH, HEIGHT
-
 # Game speeds for different difficulty levels
 EASY_FPS = 8
 MEDIUM_FPS = 12
@@ -224,8 +220,41 @@ def draw_text(surface, text, size, x, y, color=WHITE, center=False):
     surface.blit(text_surface, text_rect)
     return text_rect
 
+def handle_window_resize(event):
+    global WIDTH, HEIGHT, GRID_WIDTH, GRID_HEIGHT, GRID_SIZE, screen, is_fullscreen
+    
+    if event.type == pygame.VIDEORESIZE:
+        # Update window dimensions
+        WIDTH, HEIGHT = event.size
+        
+        # Check if we're in fullscreen mode
+        is_fullscreen = (event.size == (pygame.display.Info().current_w, pygame.display.Info().current_h))
+        
+        # Adjust grid size based on screen size
+        if is_fullscreen:
+            # Make squares bigger in fullscreen mode
+            # Target around 20x20 grid cells in fullscreen (bigger squares)
+            target_cells = 20
+            GRID_SIZE = min(WIDTH // target_cells, HEIGHT // target_cells)
+            GRID_SIZE = max(GRID_SIZE, 20)  # Don't go smaller than original
+        else:
+            # Return to original grid size in windowed mode
+            GRID_SIZE = 20
+        
+        # Update grid dimensions
+        GRID_WIDTH = WIDTH // GRID_SIZE
+        GRID_HEIGHT = HEIGHT // GRID_SIZE
+        
+        # Update the screen
+        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+        
+        return True
+    
+    return False
+
 def difficulty_selection():
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    global screen
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Snake Game - Select Difficulty")
     clock = pygame.time.Clock()
     
@@ -247,7 +276,9 @@ def difficulty_selection():
             draw_text(screen, diff, 36, WIDTH//2, HEIGHT//2 + i*50, color=color, center=True)
         
         draw_text(screen, "Use UP/DOWN arrows or W/S to select, ENTER to confirm", 24, 
-                 WIDTH//2, HEIGHT*3//4 + 50, center=True)
+                 WIDTH//2, HEIGHT*3//4 + 30, center=True)
+        draw_text(screen, "Use window controls to resize or go fullscreen", 24, 
+                 WIDTH//2, HEIGHT*3//4 + 60, center=True)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -265,6 +296,8 @@ def difficulty_selection():
                         return MEDIUM_FPS
                     else:
                         return HARD_FPS
+            # Handle window resize events
+            handle_window_resize(event)
         
         pygame.display.flip()
         clock.tick(10)
@@ -281,8 +314,9 @@ def draw_pause_menu(surface):
     draw_text(surface, "Press Q to quit", 36, WIDTH//2, HEIGHT//2 + 80, center=True)
 
 def game_loop(initial_fps):
+    global screen, WIDTH, HEIGHT, GRID_WIDTH, GRID_HEIGHT, GRID_SIZE, is_fullscreen
     # Set up the game window
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Snake Game")
     clock = pygame.time.Clock()
     
@@ -329,6 +363,20 @@ def game_loop(initial_fps):
                         snake.change_direction(LEFT)
                     elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         snake.change_direction(RIGHT)
+            
+            # Handle window resize events
+            if handle_window_resize(event):
+                # Recreate snake and food to ensure they're within the new grid boundaries
+                # Save the snake's length
+                snake_length = len(snake.body)
+                # Create a new snake
+                snake = Snake()
+                # Grow the snake to its previous length
+                for _ in range(snake_length - 1):
+                    snake.grow_snake()
+                    snake.move()
+                # Create new food
+                food = Food(snake.body)
         
         if not game_over and not paused:
             # Move the snake
@@ -388,6 +436,10 @@ def game_loop(initial_fps):
         draw_text(screen, f"Level: {level}", 36, WIDTH - 150, 10, color=level_color)
         draw_text(screen, f"Speed: {current_fps}", 24, WIDTH - 150, 50)
         
+        # Draw window mode and grid size indicator
+        mode_text = "Fullscreen" if is_fullscreen else "Windowed"
+        draw_text(screen, f"Mode: {mode_text} | Grid: {GRID_SIZE}px", 18, WIDTH - 250, 80)
+        
         # Draw controls reminder
         draw_text(screen, "Controls: Arrows or WASD", 18, WIDTH - 200, HEIGHT - 25)
         
@@ -395,7 +447,7 @@ def game_loop(initial_fps):
         progress_width = 200
         progress_height = 20
         progress_x = WIDTH - progress_width - 10
-        progress_y = 80
+        progress_y = 110
         
         # Draw progress bar background
         pygame.draw.rect(screen, GRAY, (progress_x, progress_y, progress_width, progress_height))
@@ -428,6 +480,7 @@ def game_loop(initial_fps):
         clock.tick(current_fps)
 
 def main():
+    global screen
     # Start background music
     sound_manager.play_background_music()
     
