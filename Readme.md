@@ -35,6 +35,9 @@ game over. Add some background music too.
 10. Add a pause button (spacebar) that shows a menu, and a game over screen that  
 lets you restart with the R key or quit with Q.
 
+11. Add fullscreen support with resizable window functionality. In fullscreen mode,  
+the grid squares automatically resize to be larger for better gameplay experience.
+
 ## How to Run the Game
 
 ### Prerequisites
@@ -81,6 +84,14 @@ python snake_game.py
 - Press SPACE to pause the game  
 - When game is over, press R to restart or Q to quit
 
+### Window Controls
+- Use your operating system's window controls to resize the game window
+- To enter fullscreen mode:
+  - On macOS: Click the green button in the top-left corner
+  - On Windows: Click the maximize button or drag the window to the top edge
+- In fullscreen mode, grid squares automatically become larger for better gameplay
+- The game adapts to any window size while maintaining proper proportions
+
 ### Game Features
 - Three difficulty levels: Easy, Medium, and Hard  
 - Progressive level system with increasing speed  
@@ -88,5 +99,7 @@ python snake_game.py
 - High score tracking  
 - Sound effects and background music  
 - Visual progress tracking toward next level
+- Fullscreen support with adaptive grid sizing
+- Resizable window that maintains gameplay balance
 
 Enjoy playing your Snake game!
